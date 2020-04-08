@@ -1,6 +1,7 @@
 package jp.techacademy.yoshiaki.qa_app
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
@@ -26,6 +27,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mCreateAccountListener: OnCompleteListener<AuthResult>
     private lateinit var mLoginListener: OnCompleteListener<AuthResult>
     private lateinit var mDataBaseReference: DatabaseReference
+    var login_state:Int=0
 
     // アカウント作成時にフラグを立て、ログイン処理後に名前をFirebaseに保存する
     private var mIsCreateAccount = false
@@ -65,7 +67,7 @@ class LoginActivity : AppCompatActivity() {
                 // 成功した場合
                 val user = mAuth.currentUser
                 val userRef = mDataBaseReference.child(UsersPATH).child(user!!.uid)
-
+                login_state=1//ログイン成功フラグ
                 if (mIsCreateAccount) {
                     // アカウント作成の時は表示名をFirebaseに保存する
                     val name = nameText.text.toString()
@@ -76,6 +78,7 @@ class LoginActivity : AppCompatActivity() {
 
                     // 表示名をPrefarenceに保存する
                     saveName(name)
+
                 } else {
                     userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {

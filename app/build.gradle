@@ -39,3 +39,10 @@ dependencies {
 }
 apply plugin: 'com.google.gms.google-services' // この行を追加
 
+dependencies {
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21.2'
+}
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
+}

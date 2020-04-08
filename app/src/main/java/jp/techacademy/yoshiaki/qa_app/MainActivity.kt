@@ -1,4 +1,5 @@
 package jp.techacademy.yoshiaki.qa_app
+import android.content.ClipData
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -19,6 +20,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import android.util.Base64  //追加する
+import android.view.View
 import android.widget.ListView
 
 
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var mToolbar: Toolbar
     private var mGenre = 0
-
+    val user = FirebaseAuth.getInstance().currentUser
     // --- ここから ---
     private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var mListView: ListView
@@ -106,7 +108,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         }
     }
-    // --- ここまで追加する ---
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,15 +139,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
+
+
         // ナビゲーションドロワーの設定
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val toggle = ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name)
         drawer.addDrawerListener(toggle)
         toggle.syncState()
-
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
-        navigationView.setNavigationItemSelectedListener(this)
-
+        if(user!==null){
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_login_main_drawer)
+        }
+            navigationView.setNavigationItemSelectedListener(this)
 
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
@@ -163,8 +169,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             intent.putExtra("question", mQuestionArrayList[position])
             startActivity(intent)
         }
-
-
+        navigationView.setOnClickListener(){
+            val navigationView = findViewById<NavigationView>(R.id.nav_view)
+            if(user!==null){
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(R.menu.activity_login_main_drawer)
+            }
+            else{
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(R.menu.activity_main_drawer)
+            }
+        }
     }
 
     override fun onResume() {
@@ -175,17 +190,39 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if(mGenre == 0) {
             onNavigationItemSelected(navigationView.menu.getItem(0))
         }
+        if(user==null){
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_main_drawer)
+        }else{
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_login_main_drawer)
+        }
     }
+
+    override fun onStart() {
+        super.onStart()
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        if(user==null){
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_main_drawer)
+        }else{
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_login_main_drawer)
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
+
+
+            menuInflater.inflate(R.menu.menu_main, menu)
+
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
         if (id == R.id.action_settings) {
             val intent = Intent(applicationContext, SettingActivity::class.java)
             startActivity(intent)
@@ -197,6 +234,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
+
 
         if (id == R.id.nav_hobby) {
             mToolbar.title = "趣味"
@@ -210,10 +248,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (id == R.id.nav_compter) {
             mToolbar.title = "コンピューター"
             mGenre = 4
+        }else if (id == R.id.favorite) {
+            mToolbar.title = "お気に入り"
+            mGenre = 6
+
         }
+        val user = FirebaseAuth.getInstance().currentUser
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
+
 
         // --- ここから ---
         // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
@@ -231,4 +275,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         return true
     }
+
 }
