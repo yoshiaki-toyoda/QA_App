@@ -166,10 +166,14 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 fun clickaction(favorite_type:String) {
     if (favorite_type == "Add") {
+        var data= HashMap<String, String>()
+        data["genre"] =mQuestion.genre.toString()
+
         var favoriteRef_add =
             dataBaseReference.child(FavoritePATH).child(user_UID!!.uid).child(mQuestion.questionUid)
-                .child(mQuestion.genre.toString())
-        favoriteRef_add.setValue(mQuestion.genre.toString())
+        favoriteRef_add.setValue(data)
+
+
 
     } else {
         var favoriteRef_delete = dataBaseReference.child(FavoritePATH).child(user_UID!!.uid)
